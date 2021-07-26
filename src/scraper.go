@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -26,6 +27,9 @@ type Read struct {
 var AllReads []Read
 
 func GetData(URL string) {
+
+	readJson()
+
 	re := regexp.MustCompile(`[-]?\d[\d,]*[\.]?[\d{2}]*`)
 
 	CollectorBalance := colly.NewCollector()
@@ -74,16 +78,32 @@ func GetData(URL string) {
 
 	AllReads = append(AllReads, Read)
 
-	WriteJSON(AllReads)
-
-	log.Println(Read)
+	writeJSON(AllReads)
 }
-func WriteJSON(data []Read) {
+func readJson() []Read {
+	log.Println("Lendo JSON")
+	jsonFile, err := os.Open(`data.json`)
+	if err != nil {
+		panic(err)
+	}
+
+	defer jsonFile.Close()
+
+	byteValueJSON, _ := ioutil.ReadAll(jsonFile)
+
+	json.Unmarshal(byteValueJSON, &AllReads)
+	return AllReads
+}
+func writeJSON(data []Read) {
+	log.Println("Salvando dados")
 	file, err := json.MarshalIndent(data, "", " ")
 	if err != nil {
 		log.Println("Unable to create json file")
 		return
 	}
 
-	_ = ioutil.WriteFile("data.json", file, 0644)
+	err = ioutil.WriteFile("data.json", file, 0644)
+	if err != nil {
+		log.Println(err)
+	}
 }
