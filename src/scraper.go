@@ -84,6 +84,7 @@ func GetData(URL string) {
 	convertJSON()
 }
 func readJson() []Read {
+	//Verify if the data.json file exists and creat a new one if it doesnt
 	if !Exists(`./data/data.json`) {
 		log.Println("Criando arquivo JSON")
 		jsonFile, err := os.Create(`./data/data.json`)
@@ -95,11 +96,13 @@ func readJson() []Read {
 	}
 	log.Println("Lendo JSON")
 
+	//Open data.json file
 	jsonFile, err := os.Open(`./data/data.json`)
 	if err != nil {
 		panic(err)
 	}
 
+	//closes the data.json file
 	defer jsonFile.Close()
 
 	byteValueJSON, _ := ioutil.ReadAll(jsonFile)
@@ -124,7 +127,7 @@ func writeJSON(data []Read) {
 func convertJSON() {
 	readJson()
 	log.Println("Escrevendo arquivo CSV")
-	csvFile, err := os.Create("./data/data.csv")
+	csvFile, err := os.Create("/home/jordan/Documentos/EcoinTracker/data.csv")
 	if err != nil {
 		panic(err)
 	}
