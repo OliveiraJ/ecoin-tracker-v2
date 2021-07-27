@@ -1,7 +1,9 @@
 package src
 
 import (
+	"encoding/csv"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -79,10 +81,11 @@ func GetData(URL string) {
 	AllReads = append(AllReads, Read)
 
 	writeJSON(AllReads)
+	convertJSON()
 }
 func readJson() []Read {
 	log.Println("Lendo JSON")
-	jsonFile, err := os.Open(`data.json`)
+	jsonFile, err := os.Open(`./data/data.json`)
 	if err != nil {
 		panic(err)
 	}
@@ -102,8 +105,31 @@ func writeJSON(data []Read) {
 		return
 	}
 
-	err = ioutil.WriteFile("data.json", file, 0644)
+	err = ioutil.WriteFile("./data/data.json", file, 0644)
 	if err != nil {
 		log.Println(err)
 	}
+
+}
+func convertJSON() {
+	readJson()
+	log.Println("Escrevendo arquivo CSV")
+	csvFile, err := os.Create("./data/data.csv")
+	if err != nil {
+		panic(err)
+	}
+	defer csvFile.Close()
+
+	writer := csv.NewWriter(csvFile)
+	headRow := []string{"Burned Tokens", "Holders", "Date"}
+	writer.Write(headRow)
+	for _, jsonData := range AllReads {
+		var row []string
+		row = append(row, fmt.Sprintf("%f", jsonData.BurnedTokens))
+		row = append(row, fmt.Sprint(jsonData.Holders))
+		row = append(row, jsonData.Date)
+		writer.Write(row)
+	}
+
+	writer.Flush()
 }
