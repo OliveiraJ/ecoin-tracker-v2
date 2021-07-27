@@ -84,7 +84,17 @@ func GetData(URL string) {
 	convertJSON()
 }
 func readJson() []Read {
+	if !Exists(`./data/data.json`) {
+		log.Println("Criando arquivo JSON")
+		jsonFile, err := os.Create(`./data/data.json`)
+		if err != nil {
+			panic(err)
+		}
+		log.Println("Arquivo JSON criado")
+		defer jsonFile.Close()
+	}
 	log.Println("Lendo JSON")
+
 	jsonFile, err := os.Open(`./data/data.json`)
 	if err != nil {
 		panic(err)
@@ -132,4 +142,12 @@ func convertJSON() {
 	}
 
 	writer.Flush()
+}
+func Exists(fileName string) bool {
+	if _, err := os.Stat(fileName); err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
+	return true
 }
