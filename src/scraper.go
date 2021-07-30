@@ -5,7 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
+
+	//"log"
 	"os"
 	"regexp"
 	"strconv"
@@ -72,7 +73,7 @@ func GetData(URL string) {
 		}
 	})
 	CollectorBalance.OnRequest(func(request *colly.Request) {
-		log.Println("Visiting", request.URL.String())
+		fmt.Fprintln(os.Stdout, "Visiting", request.URL.String())
 	})
 
 	CollectorBalance.Visit(URL)
@@ -86,15 +87,15 @@ func GetData(URL string) {
 func readJson() []Read {
 	//Verify if the data.json file exists and creat a new one if it doesnt
 	if !Exists(`/home/jordan/Documentos/EcoinTracker/data.json`) {
-		log.Println("Criando arquivo JSON")
+		fmt.Fprintln(os.Stdout, "Criando arquivo JSON")
 		jsonFile, err := os.Create(`/home/jordan/Documentos/EcoinTracker/data.json`)
 		if err != nil {
 			panic(err)
 		}
-		log.Println("Arquivo JSON criado")
+		fmt.Fprintln(os.Stdout, "Arquivo JSON criado")
 		defer jsonFile.Close()
 	}
-	log.Println("Lendo JSON")
+	fmt.Fprintln(os.Stdout, "Lendo JSON")
 
 	//Open data.json file
 	jsonFile, err := os.Open(`/home/jordan/Documentos/EcoinTracker/data.json`)
@@ -111,22 +112,22 @@ func readJson() []Read {
 	return AllReads
 }
 func writeJSON(data []Read) {
-	log.Println("Salvando dados")
+	fmt.Fprintln(os.Stdout, "Salvando dados")
 	file, err := json.MarshalIndent(data, "", " ")
 	if err != nil {
-		log.Println("Unable to create json file")
+		fmt.Fprintln(os.Stdout, "Unable to create json file")
 		return
 	}
 
 	err = ioutil.WriteFile("/home/jordan/Documentos/EcoinTracker/data.json", file, 0644)
 	if err != nil {
-		log.Println(err)
+		fmt.Fprintln(os.Stdout, err)
 	}
 
 }
 func convertJSON() {
 	readJson()
-	log.Println("Escrevendo arquivo CSV")
+	fmt.Println("Escrevendo arquivo CSV")
 	csvFile, err := os.Create("/home/jordan/Documentos/EcoinTracker/data.csv")
 	if err != nil {
 		panic(err)
