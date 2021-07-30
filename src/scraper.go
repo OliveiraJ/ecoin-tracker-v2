@@ -85,9 +85,9 @@ func GetData(URL string) {
 }
 func readJson() []Read {
 	//Verify if the data.json file exists and creat a new one if it doesnt
-	if !Exists(`./data/data.json`) {
+	if !Exists(`/home/jordan/Documentos/EcoinTracker/data.json`) {
 		log.Println("Criando arquivo JSON")
-		jsonFile, err := os.Create(`./data/data.json`)
+		jsonFile, err := os.Create(`/home/jordan/Documentos/EcoinTracker/data.json`)
 		if err != nil {
 			panic(err)
 		}
@@ -97,7 +97,7 @@ func readJson() []Read {
 	log.Println("Lendo JSON")
 
 	//Open data.json file
-	jsonFile, err := os.Open(`./data/data.json`)
+	jsonFile, err := os.Open(`/home/jordan/Documentos/EcoinTracker/data.json`)
 	if err != nil {
 		panic(err)
 	}
@@ -118,7 +118,7 @@ func writeJSON(data []Read) {
 		return
 	}
 
-	err = ioutil.WriteFile("./data/data.json", file, 0644)
+	err = ioutil.WriteFile("/home/jordan/Documentos/EcoinTracker/data.json", file, 0644)
 	if err != nil {
 		log.Println(err)
 	}
