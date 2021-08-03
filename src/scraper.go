@@ -25,31 +25,42 @@ type Read struct {
 	Holders      int64   `json:"holders"`
 	Transfers    int64   `json:"transfers"`
 	Date         string  `json:"date"`
+	Hour         string  `json:"hour"`
 }
 
+// Slice of the type Read returned by the GetData function
 var AllReads []Read
 
+// GetData scrapes from Bscscan.com, using the Colly package, a Regex and the Replace function to help to cleand the screaped data
 func GetData(URL string) {
 
-	readJson()
+	ReadJson()
 
+	// Regular expression that helps to clean the scraped data
 	re := regexp.MustCompile(`[-]?\d[\d,]*[\.]?[\d{2}]*`)
 
+	// Collector from colly package
 	CollectorBalance := colly.NewCollector()
-
 	CollectorHolders := colly.NewCollector()
 
+	// Auxiliar variable Read of type Read
 	var Read Read
 
+	// CollectorBalance scrapes the Bscscan.com the ammount of burned tokens in the dead wallet and adds the time
 	CollectorBalance.OnHTML("#ContentPlaceHolder1_divFilteredHolderBalance", func(e *colly.HTMLElement) {
 
 		r := re.FindString(e.Text)
-		//Replace the comma carachter from the string after the regex treatment making it easy to convert to a number later.
+
+		// Replace the comma carachter from the string after the regex treatment making it easy to convert to a number later.
 		r = strings.Replace(r, comma, replaceArgument, replaceTimes)
 
-		//Adding the time value to the Read.Date property.
-		Read.Date = time.Now().Format("2006/01/02")
+		// Adds the time value to the Read.Date property.
+		Read.Date = time.Now().Format("02/01/2006")
 
+		// Adds the time value to the Read.Hour property
+		Read.Hour = time.Now().Format("15:04:05")
+
+		// Converts the screaped value to a string and adds it to the Read.BurnedTokens property
 		if r != "" {
 			value, err := strconv.ParseFloat(r, 10)
 			if err == nil {
@@ -58,13 +69,14 @@ func GetData(URL string) {
 		}
 	})
 
-	//cHolders capture the number of holders of e-coin
+	// CollectorHolders scrapes the Bscscan.com the ammount holders of the Ecoin Finance token
 	CollectorHolders.OnHTML("#ContentPlaceHolder1_tr_tokenHolders", func(e *colly.HTMLElement) {
 		r := re.FindString(e.Text)
 
 		//Replace the comma carachter from the string after the regex treatment making it easy to convert to a number later.
 		r = strings.Replace(r, comma, replaceArgument, replaceTimes)
 
+		// Converts the screaped value to a string and adds it to the Read.Holders property
 		if r != "" {
 			value, err := strconv.ParseInt(r, 10, 64)
 			if err == nil {
@@ -72,6 +84,7 @@ func GetData(URL string) {
 			}
 		}
 	})
+
 	CollectorBalance.OnRequest(func(request *colly.Request) {
 		fmt.Fprintln(os.Stdout, "Visiting", request.URL.String())
 	})
@@ -84,7 +97,10 @@ func GetData(URL string) {
 	writeJSON(AllReads)
 	convertJSON()
 }
-func readJson() []Read {
+
+// ReadJson function reads the JSON file and returns a slice of type Read
+func ReadJson() []Read {
+
 	//Verify if the data.json file exists and creat a new one if it doesnt
 	if !Exists(`/home/jordan/Documentos/EcoinTracker/data.json`) {
 		fmt.Fprintln(os.Stdout, "Criando arquivo JSON")
@@ -111,6 +127,8 @@ func readJson() []Read {
 	json.Unmarshal(byteValueJSON, &AllReads)
 	return AllReads
 }
+
+// WriteJson function, write the data in a JSON file
 func writeJSON(data []Read) {
 	fmt.Fprintln(os.Stdout, "Salvando dados")
 	file, err := json.MarshalIndent(data, "", " ")
@@ -125,8 +143,10 @@ func writeJSON(data []Read) {
 	}
 
 }
+
+// CovertJson function, converts  the Data.json file in the Data.csv file
 func convertJSON() {
-	readJson()
+	ReadJson()
 	fmt.Println("Escrevendo arquivo CSV")
 	csvFile, err := os.Create("/home/jordan/Documentos/EcoinTracker/data.csv")
 	if err != nil {
@@ -135,18 +155,21 @@ func convertJSON() {
 	defer csvFile.Close()
 
 	writer := csv.NewWriter(csvFile)
-	headRow := []string{"Burned Tokens", "Holders", "Date"}
+	headRow := []string{"Burned Tokens", "Holders", "Date", "Hour"}
 	writer.Write(headRow)
 	for _, jsonData := range AllReads {
 		var row []string
 		row = append(row, fmt.Sprintf("%f", jsonData.BurnedTokens))
 		row = append(row, fmt.Sprint(jsonData.Holders))
 		row = append(row, jsonData.Date)
+		row = append(row, jsonData.Hour)
 		writer.Write(row)
 	}
 
 	writer.Flush()
 }
+
+// Exists function verifys if the json file exists and returns false if it doesn't or true if it does
 func Exists(fileName string) bool {
 	if _, err := os.Stat(fileName); err != nil {
 		if os.IsNotExist(err) {

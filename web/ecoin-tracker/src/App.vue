@@ -1,17 +1,33 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div>
+    <table id="table"></table>
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+   
+  },
+  mounted(){
+    function Get(url){
+    let request = new XMLHttpRequest()
+    request.open("GET", url, false)
+    request.send()
+    return request.resposeText
+    }
+
+    function mainConsume(){
+      console.log(Get(fetch("http://localhost:10000")))
+    }
+
+    mainConsume()
   }
 }
+
 </script>
 
 <style>
