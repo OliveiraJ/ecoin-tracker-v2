@@ -15,7 +15,7 @@ func main() {
 	// Goroutine that runs the server functions
 	go server.HandleResquests()
 
-	scrapeTime := time.Duration(5) * time.Second
+	scrapeTime := time.Duration(1) * time.Hour
 	ticker := time.NewTicker(scrapeTime)
 
 	fmt.Fprintln(os.Stdout, "EcoinTracker iniciado...")
