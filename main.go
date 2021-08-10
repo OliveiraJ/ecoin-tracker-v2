@@ -12,24 +12,28 @@ import (
 const URL string = "https://bscscan.com/token/0x4cbdfad03b968bf43449d0908f319ae4a5a33371?a=0x000000000000000000000000000000000000dead"
 
 func main() {
-	// go server.GetJson()
+	// Goroutine that runs the server functions
 	go server.HandleResquests()
 
-	scrapeTime := time.Duration(1) * time.Minute
+	scrapeTime := time.Duration(5) * time.Second
 	ticker := time.NewTicker(scrapeTime)
 
-	//ticker, reprete a função a cada intervalo de tempo.
 	fmt.Fprintln(os.Stdout, "EcoinTracker iniciado...")
+
+	// Runs the loop that verify the local time and reuns the functions when the specifeid time is reached
 	for range ticker.C {
 		t := time.Now()
-		if t.Hour() == 12 {
+		if t.Hour() == 22 {
 			fmt.Fprintln(os.Stdout, "Começando nova leitura...")
+
+			// Runs the GetData function of the src package, with the URL of the ecoin token deadwallet
 			src.GetData(URL)
+
 			fmt.Fprintln(os.Stdout, "Leitura efetuda")
 			fmt.Fprintln(os.Stdout, "Fim do Ciclo!")
 		} else {
+			fmt.Fprintln(os.Stdout, "--> Hora atual: ", time.Now().Format("15:04:05"))
 			fmt.Fprintln(os.Stdout, "Aguardando horário especificado...")
-			fmt.Fprintln(os.Stdout, "--> Hora atual: ", time.Now().Hour())
 		}
 
 	}

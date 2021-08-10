@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	//"log"
 	"os"
 	"regexp"
 	"strconv"
@@ -31,24 +30,28 @@ type Read struct {
 // Slice of the type Read returned by the GetData function
 var AllReads []Read
 
-// GetData scrapes from Bscscan.com, using the Colly package, a Regex and the Replace function to help to cleand the screaped data
+// GetData scrapes from Bscscan.com, using the Colly package, a Regex and the Replace function, readig the Data.json file
+// and writing it with the new data, preserving the previous data in it. Also calls the ConvertJson function, generating
+// a Data.csv by converting the Data.json file to it.
 func GetData(URL string) {
 
+	// Calls the ReadJson function, reading the Data.json file so it can be updated with the new scraped data.
 	ReadJson()
 
-	// Regular expression that helps to clean the scraped data
+	// Regular expression that helps to clean the scraped data.
 	re := regexp.MustCompile(`[-]?\d[\d,]*[\.]?[\d{2}]*`)
 
-	// Collector from colly package
+	// Collector from colly package.
 	CollectorBalance := colly.NewCollector()
 	CollectorHolders := colly.NewCollector()
 
-	// Auxiliar variable Read of type Read
+	// Auxiliar variable Read of type Read.
 	var Read Read
 
-	// CollectorBalance scrapes the Bscscan.com the ammount of burned tokens in the dead wallet and adds the time
+	// CollectorBalance scrapes the Bscscan.com the ammount of burned tokens in the dead wallet and adds the time.
 	CollectorBalance.OnHTML("#ContentPlaceHolder1_divFilteredHolderBalance", func(e *colly.HTMLElement) {
 
+		// Aplys the regex Re to the e.Text scraped by the collector, helpíng to clean it and keep only the usefull data
 		r := re.FindString(e.Text)
 
 		// Replace the comma carachter from the string after the regex treatment making it easy to convert to a number later.
@@ -89,16 +92,20 @@ func GetData(URL string) {
 		fmt.Fprintln(os.Stdout, "Visiting", request.URL.String())
 	})
 
+	// Gives the collectors a start and passes the URL it should visit
 	CollectorBalance.Visit(URL)
 	CollectorHolders.Visit(URL)
+
+	Read.Transfers = GetTransfers().Count
 
 	AllReads = append(AllReads, Read)
 
 	writeJSON(AllReads)
 	convertJSON()
+
 }
 
-// ReadJson function reads the JSON file and returns a slice of type Read
+// ReadJson reads the JSON file and returns a slice of type Read
 func ReadJson() []Read {
 
 	//Verify if the data.json file exists and creat a new one if it doesnt
@@ -119,16 +126,21 @@ func ReadJson() []Read {
 		panic(err)
 	}
 
-	//closes the data.json file
+	// closes the data.json file
 	defer jsonFile.Close()
 
-	byteValueJSON, _ := ioutil.ReadAll(jsonFile)
+	byteValueJSON, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		fmt.Fprintln(os.Stdout, "Erro ao ler arquivo JSON --> ", err)
+	}
 
 	json.Unmarshal(byteValueJSON, &AllReads)
+
+	// Return the slice with the read data from the scraper and json file
 	return AllReads
 }
 
-// WriteJson function, write the data in a JSON file
+// WriteJson write the data in a JSON file
 func writeJSON(data []Read) {
 	fmt.Fprintln(os.Stdout, "Salvando dados")
 	file, err := json.MarshalIndent(data, "", " ")
@@ -144,7 +156,7 @@ func writeJSON(data []Read) {
 
 }
 
-// CovertJson function, converts  the Data.json file in the Data.csv file
+// CovertJson converts  the Data.json file in the Data.csv file
 func convertJSON() {
 	ReadJson()
 	fmt.Println("Escrevendo arquivo CSV")
@@ -169,7 +181,7 @@ func convertJSON() {
 	writer.Flush()
 }
 
-// Exists function verifys if the json file exists and returns false if it doesn't or true if it does
+// Exists verifys if the json file exists and returns false if it doesn't or true if it does
 func Exists(fileName string) bool {
 	if _, err := os.Stat(fileName); err != nil {
 		if os.IsNotExist(err) {

@@ -10,21 +10,14 @@
 export default {
   name: 'App',
   components: {
-   
-  },
+    
+    },
   mounted(){
-    function Get(url){
-    let request = new XMLHttpRequest()
-    request.open("GET", url, false)
-    request.send()
-    return request.resposeText
-    }
-
-    function mainConsume(){
-      console.log(Get(fetch("http://localhost:10000")))
-    }
-
-    mainConsume()
+    const url = "http://localhost:9000/"
+    fetch(url)
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(err => console.log(err))
   }
 }
 
