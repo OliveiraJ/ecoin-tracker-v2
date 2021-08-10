@@ -96,13 +96,15 @@ func GetData(URL string) {
 	CollectorBalance.Visit(URL)
 	CollectorHolders.Visit(URL)
 
+	// Calls the GetTransfers function, storing the returned value in the Read.Transfers property
 	Read.Transfers = GetTransfers().Count
 
+	// Updates the AllReads slice with the most recent Read
 	AllReads = append(AllReads, Read)
 
+	// Writes the data.json file with the most updates AllReads slice as its content.
 	writeJSON(AllReads)
 	convertJSON()
-
 }
 
 // ReadJson reads the JSON file and returns a slice of type Read

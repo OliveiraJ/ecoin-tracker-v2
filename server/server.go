@@ -14,13 +14,13 @@ const Dir = "/home/jordan/Documentos/EcoinTracker"
 // GetJson function returns the JSON file in the respective route
 func GetJson(res http.ResponseWriter, req *http.Request) {
 	setupCorsResponse(&res, req)
-	http.ServeFile(res, req, Dir+"/data-teste.json")
+	http.ServeFile(res, req, Dir+"/data.json")
 }
 
 // GetCSV function returns the CSV file the the respective route
 func GetCsv(res http.ResponseWriter, req *http.Request) {
 	setupCorsResponse(&res, req)
-	http.ServeFile(res, req, Dir+"/data-teste.csv")
+	http.ServeFile(res, req, Dir+"/data.csv")
 }
 
 // Get function the data in a JSON format
@@ -38,7 +38,7 @@ func HandleResquests() {
 	router.HandleFunc("/csv", GetCsv)
 	router.HandleFunc("/json", GetJson)
 
-	log.Fatal(http.ListenAndServe(":10000", router))
+	log.Fatal(http.ListenAndServe(":9000", router))
 }
 
 func setupCorsResponse(res *http.ResponseWriter, req *http.Request) {
