@@ -167,12 +167,13 @@ func convertJSON() {
 	defer csvFile.Close()
 
 	writer := csv.NewWriter(csvFile)
-	headRow := []string{"Burned Tokens", "Holders", "Date", "Hour"}
+	headRow := []string{"Burned Tokens", "Holders", "Transfers", "Date", "Hour"}
 	writer.Write(headRow)
 	for _, jsonData := range AllReads {
 		var row []string
 		row = append(row, fmt.Sprintf("%f", jsonData.BurnedTokens))
 		row = append(row, fmt.Sprint(jsonData.Holders))
+		row = append(row, fmt.Sprint(jsonData.Transfers))
 		row = append(row, jsonData.Date)
 		row = append(row, jsonData.Hour)
 		writer.Write(row)
