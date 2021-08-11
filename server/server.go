@@ -38,7 +38,7 @@ func HandleResquests() {
 	router.HandleFunc("/csv", GetCsv)
 	router.HandleFunc("/json", GetJson)
 
-	log.Fatal(http.ListenAndServe(":9000", router))
+	log.Fatal(http.ListenAndServe(":10000", router))
 }
 
 func setupCorsResponse(res *http.ResponseWriter, req *http.Request) {

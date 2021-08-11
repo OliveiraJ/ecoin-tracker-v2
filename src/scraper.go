@@ -18,6 +18,9 @@ import (
 const comma string = ","
 const replaceArgument string = ""
 const replaceTimes int = 4
+const pathFileJson = "./data/data.json"
+const pathFileCsv = "./data/data.csv"
+const pathFolder = "./data"
 
 type Read struct {
 	BurnedTokens float64 `json:"burnedTokens"`
@@ -110,20 +113,31 @@ func GetData(URL string) {
 // ReadJson reads the JSON file and returns a slice of type Read
 func ReadJson() []Read {
 
-	//Verify if the data.json file exists and creat a new one if it doesnt
-	if !Exists(`/home/jordan/Documentos/EcoinTracker/data.json`) {
-		fmt.Fprintln(os.Stdout, "Criando arquivo JSON")
-		jsonFile, err := os.Create(`/home/jordan/Documentos/EcoinTracker/data.json`)
+	// Verify if the data diretory exists and creat it if it doesnt
+	if !Exists(pathFolder) {
+		fmt.Fprintln(os.Stdout, "./data folder doesn't exist, creating folder")
+		err := os.Mkdir("data", 0755)
+		if err != nil {
+			fmt.Fprintln(os.Stdout, "Error on creating ./data folder")
+			panic(err)
+		}
+		fmt.Fprintln(os.Stdout, "./data folder created")
+	}
+
+	// Verify if the data.json file exists and creat a new one if it doesnt
+	if !Exists(pathFileJson) {
+		fmt.Fprintln(os.Stdout, "data.json doesn't exist, creating data.json file")
+		jsonFile, err := os.Create(pathFileJson)
 		if err != nil {
 			panic(err)
 		}
-		fmt.Fprintln(os.Stdout, "Arquivo JSON criado")
+		fmt.Fprintln(os.Stdout, "data.json file created")
 		defer jsonFile.Close()
 	}
-	fmt.Fprintln(os.Stdout, "Lendo JSON")
+	fmt.Fprintln(os.Stdout, "Reading data.json file")
 
 	//Open data.json file
-	jsonFile, err := os.Open(`/home/jordan/Documentos/EcoinTracker/data.json`)
+	jsonFile, err := os.Open(pathFileJson)
 	if err != nil {
 		panic(err)
 	}
@@ -133,7 +147,7 @@ func ReadJson() []Read {
 
 	byteValueJSON, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
-		fmt.Fprintln(os.Stdout, "Erro ao ler arquivo JSON --> ", err)
+		fmt.Fprintln(os.Stdout, "Error on reading json file --> ", err)
 	}
 
 	json.Unmarshal(byteValueJSON, &AllReads)
@@ -144,14 +158,14 @@ func ReadJson() []Read {
 
 // WriteJson write the data in a JSON file
 func writeJSON(data []Read) {
-	fmt.Fprintln(os.Stdout, "Salvando dados")
+	fmt.Fprintln(os.Stdout, "Saving data")
 	file, err := json.MarshalIndent(data, "", " ")
 	if err != nil {
 		fmt.Fprintln(os.Stdout, "Unable to create json file")
 		return
 	}
 
-	err = ioutil.WriteFile("/home/jordan/Documentos/EcoinTracker/data.json", file, 0644)
+	err = ioutil.WriteFile(pathFileJson, file, 0644)
 	if err != nil {
 		fmt.Fprintln(os.Stdout, err)
 	}
@@ -161,8 +175,8 @@ func writeJSON(data []Read) {
 // CovertJson converts  the Data.json file in the Data.csv file
 func convertJSON() {
 	ReadJson()
-	fmt.Println("Escrevendo arquivo CSV")
-	csvFile, err := os.Create("/home/jordan/Documentos/EcoinTracker/data.csv")
+	fmt.Println("Writing data.csv file")
+	csvFile, err := os.Create(pathFileCsv)
 	if err != nil {
 		panic(err)
 	}

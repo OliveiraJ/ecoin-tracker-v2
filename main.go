@@ -29,8 +29,8 @@ func main() {
 			// Runs the GetData function of the src package, with the URL of the ecoin token deadwallet
 			src.GetData(URL)
 
-			fmt.Fprintln(os.Stdout, "Leitura efetuda")
-			fmt.Fprintln(os.Stdout, "Fim do Ciclo!")
+			fmt.Fprintln(os.Stdout, "End of reading step")
+			fmt.Fprintln(os.Stdout, "End of cicle!")
 		} else {
 			fmt.Fprintln(os.Stdout, "--> Hora atual: ", time.Now().Format("15:04:05"))
 			fmt.Fprintln(os.Stdout, "Aguardando horário especificado...")
