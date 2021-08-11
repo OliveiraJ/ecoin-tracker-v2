@@ -18,7 +18,7 @@ func main() {
 	scrapeTime := time.Duration(1) * time.Hour
 	ticker := time.NewTicker(scrapeTime)
 
-	fmt.Fprintln(os.Stdout, "Start Ecointracker...")
+	fmt.Fprintln(os.Stdout, "Ecointracker api started...")
 
 	// Runs the loop that verify the local time and reuns the functions when the specifeid time is reached
 	for range ticker.C {
