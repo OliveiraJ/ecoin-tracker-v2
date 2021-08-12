@@ -35,7 +35,5 @@ func main() {
 			fmt.Fprintln(os.Stdout, "--> Hour: ", time.Now().Format("15:04:05"))
 			fmt.Fprintln(os.Stdout, "Waiting for the specified time...")
 		}
-
 	}
-
 }
