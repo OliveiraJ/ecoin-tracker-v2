@@ -7,12 +7,9 @@ import (
 	"io/ioutil"
 
 	"os"
-	"regexp"
-	"strconv"
-	"strings"
-	"time"
 
-	"github.com/gocolly/colly/v2"
+	"github.com/OliveiraJ/ecoin-tracker-v2/models"
+	src "github.com/OliveiraJ/ecoin-tracker-v2/src/collectors"
 )
 
 const comma string = ","
@@ -22,85 +19,22 @@ const pathFileJson = "./data/data.json"
 const pathFileCsv = "./data/data.csv"
 const pathFolder = "./data"
 
-type Read struct {
-	BurnedTokens float64 `json:"burnedTokens"`
-	Holders      int64   `json:"holders"`
-	Transfers    int64   `json:"transfers"`
-	Date         string  `json:"date"`
-	Hour         string  `json:"hour"`
-}
-
 // Slice of the type Read returned by the GetData function
-var AllReads []Read
+var AllReads []models.Read
 
-// GetData scrapes from Bscscan.com, using the Colly package, a Regex and the Replace function, readig the Data.json file
-// and writing it with the new data, preserving the previous data in it. Also calls the ConvertJson function, generating
-// a Data.csv by converting the Data.json file to it.
+// Calls the GetBalance, GetHolders and GetTransfers saving the resulting data in a .JSON and a .CSV files
 func GetData(URL string) {
 
 	// Calls the ReadJson function, reading the Data.json file so it can be updated with the new scraped data.
 	ReadJson()
 
-	// Regular expression that helps to clean the scraped data.
-	re := regexp.MustCompile(`[-]?\d[\d,]*[\.]?[\d{2}]*`)
-
-	// Collector from colly package.
-	CollectorBalance := colly.NewCollector()
-	CollectorHolders := colly.NewCollector()
-
 	// Auxiliar variable Read of type Read.
-	var Read Read
+	var Read models.Read
 
-	// CollectorBalance scrapes the Bscscan.com the ammount of burned tokens in the dead wallet and adds the time.
-	CollectorBalance.OnHTML("#ContentPlaceHolder1_divFilteredHolderBalance", func(e *colly.HTMLElement) {
-
-		// Aplys the regex Re to the e.Text scraped by the collector, helpíng to clean it and keep only the usefull data
-		r := re.FindString(e.Text)
-
-		// Replace the comma carachter from the string after the regex treatment making it easy to convert to a number later.
-		r = strings.Replace(r, comma, replaceArgument, replaceTimes)
-
-		// Adds the time value to the Read.Date property.
-		Read.Date = time.Now().Format("02/01/2006")
-
-		// Adds the time value to the Read.Hour property
-		Read.Hour = time.Now().Format("15:04:05")
-
-		// Converts the screaped value to a string and adds it to the Read.BurnedTokens property
-		if r != "" {
-			value, err := strconv.ParseFloat(r, 10)
-			if err == nil {
-				Read.BurnedTokens = value
-			}
-		}
-	})
-
-	// CollectorHolders scrapes the Bscscan.com the ammount holders of the Ecoin Finance token
-	CollectorHolders.OnHTML("#ContentPlaceHolder1_tr_tokenHolders", func(e *colly.HTMLElement) {
-		r := re.FindString(e.Text)
-
-		//Replace the comma carachter from the string after the regex treatment making it easy to convert to a number later.
-		r = strings.Replace(r, comma, replaceArgument, replaceTimes)
-
-		// Converts the screaped value to a string and adds it to the Read.Holders property
-		if r != "" {
-			value, err := strconv.ParseInt(r, 10, 64)
-			if err == nil {
-				Read.Holders = value
-			}
-		}
-	})
-
-	CollectorBalance.OnRequest(func(request *colly.Request) {
-		fmt.Fprintln(os.Stdout, "Visiting", request.URL.String())
-	})
-
-	// Gives the collectors a start and passes the URL it should visit
-	CollectorBalance.Visit(URL)
-	CollectorHolders.Visit(URL)
-
+	Read.BurnedTokens, Read.Date, Read.Hour = src.GetBalance(URL)
+	Read.Holders = src.GetHolders(URL)
 	// Calls the GetTransfers function, storing the returned value in the Read.Transfers property
-	Read.Transfers = GetTransfers().Count
+	Read.Transfers = src.GetTransfers().Count
 
 	// Updates the AllReads slice with the most recent Read
 	AllReads = append(AllReads, Read)
@@ -111,7 +45,7 @@ func GetData(URL string) {
 }
 
 // ReadJson reads the JSON file and returns a slice of type Read
-func ReadJson() []Read {
+func ReadJson() []models.Read {
 
 	// Verify if the data diretory exists and creat it if it doesnt
 	if !Exists(pathFolder) {
@@ -157,7 +91,7 @@ func ReadJson() []Read {
 }
 
 // WriteJson write the data in a JSON file
-func writeJSON(data []Read) {
+func writeJSON(data []models.Read) {
 	fmt.Fprintln(os.Stdout, "Saving data")
 	file, err := json.MarshalIndent(data, "", " ")
 	if err != nil {

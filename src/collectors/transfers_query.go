@@ -5,31 +5,15 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/OliveiraJ/ecoin-tracker-v2/models"
 )
 
-// Stores the data received by the query.
-type transfers struct {
-	Count    int64
-	Days     int
-	Min_date string
-	Max_date string
-}
+var b models.BitqueryData
 
-// Works as a adapter so the received data, once this has a particular structure that demands the data to be wraped by other structs
-// dificulting it conversion.
-type bitqueryData struct {
-	Data struct {
-		Ethereum struct {
-			Transfers []transfers
-		}
-	}
-}
-
-var b bitqueryData
-
-// Do a query passing the schema of a graphql query and its variables to the https://graphql.bitquery.io api, returning a int64 value with the ammount of transfers
+// Do a query passing the graphql schema's query and its variables to the https://graphql.bitquery.io api, returning a int64 value with the ammount of transfers
 // made with the Ecoin Finance token.
-func GetTransfers() transfers {
+func GetTransfers() models.Transfers {
 
 	// Map that stores the Schema of the query, in a string format.
 	jsonData := map[string]string{
