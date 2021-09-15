@@ -1,0 +1,45 @@
+version: "3.7"
+services:
+  database:
+    image: postgres:latest
+    container_name: "ecoin_database"
+    restart: always
+    env_file: .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - ecoin_postgresql_volume:/var/postgresql/data
+    networks:
+      ecoin-compose-network:
+        ipv4_address: 172.20.0.3
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: "pgadmin"
+    restart: always
+    env_file: .env
+    ports:
+      - "9090:80"
+    depends_on:
+      - database
+    networks:
+      - ecoin-compose-network
+    volumes:
+      - ecoin_pgadmin_volume:/var/pgadmin/data
+  server:
+    image: ecointracker:server
+    container_name: "ecoin_server"
+    ports:
+      - "10000:10000"
+    volumes:
+      - ecoin_server_volume:/var/postgresql/data
+    networks:
+      - ecoin-compose-network
+volumes:
+  ecoin_server_volume:
+  ecoin_postgresql_volume:
+  ecoin_pgadmin_volume:
+
+networks:
+  ecoin-compose-network:
+    driver: bridge

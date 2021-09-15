@@ -8,6 +8,7 @@ import (
 
 	"os"
 
+	"github.com/OliveiraJ/ecoin-tracker-v2/db"
 	"github.com/OliveiraJ/ecoin-tracker-v2/models"
 	src "github.com/OliveiraJ/ecoin-tracker-v2/src/collectors"
 )
@@ -24,6 +25,8 @@ var AllReads []models.Read
 
 // Calls the GetBalance, GetHolders and GetTransfers saving the resulting data in a .JSON and a .CSV files
 func GetData(URL string) {
+	// Creates a connection with the database
+	database := db.NewDbConnection()
 
 	// Calls the ReadJson function, reading the Data.json file so it can be updated with the new scraped data.
 	ReadJson()
@@ -31,16 +34,31 @@ func GetData(URL string) {
 	// Auxiliar variable Read of type Read.
 	var Read models.Read
 
+	// Calls src.GetBalance function and atributes its return to the Read struct of type models.Read
 	Read.BurnedTokens, Read.Date, Read.Hour = src.GetBalance(URL)
+	// Calls src.GetHolders function and atributes its return to the Read struct of type models.Read
 	Read.Holders = src.GetHolders(URL)
 	// Calls the GetTransfers function, storing the returned value in the Read.Transfers property
 	Read.Transfers = src.GetTransfers().Count
+
+	// Increments the ID value to match the id of the last entry on the Data.json file, sincronizing the file with the database
+	Read.ID = AllReads[len(AllReads)-1].ID + 1
 
 	// Updates the AllReads slice with the most recent Read
 	AllReads = append(AllReads, Read)
 
 	// Writes the data.json file with the most updates AllReads slice as its content.
 	writeJSON(AllReads)
+
+	// If database doesn't habe a models.Read table, then creates a table and inserts in it all the values in the Json File
+	// otherwise inserts only the actual Read.
+	if !database.Debug().Migrator().HasTable(&models.Read{}) {
+		db.Setup(database)
+		database.Debug().CreateInBatches(AllReads, len(AllReads))
+	} else {
+		database.Debug().Create(&Read)
+	}
+
 	convertJSON()
 }
 
@@ -52,7 +70,7 @@ func ReadJson() []models.Read {
 		fmt.Fprintln(os.Stdout, "./data folder doesn't exist, creating folder")
 		err := os.Mkdir("data", 0755)
 		if err != nil {
-			fmt.Fprintln(os.Stdout, "Error on creating ./data folder")
+			fmt.Fprintln(os.Stdout, "Error on creating ./data folder ", err)
 			panic(err)
 		}
 		fmt.Fprintln(os.Stdout, "./data folder created")

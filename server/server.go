@@ -14,6 +14,7 @@ const Dir = "./data"
 // GetJson function returns the JSON file in the respective route
 func GetJson(res http.ResponseWriter, req *http.Request) {
 	setupCorsResponse(&res, req)
+	log.Println("Returning JSON")
 	http.ServeFile(res, req, Dir+"/data.json")
 
 }
@@ -21,6 +22,7 @@ func GetJson(res http.ResponseWriter, req *http.Request) {
 // GetCSV function returns the CSV file the the respective route
 func GetCsv(res http.ResponseWriter, req *http.Request) {
 	setupCorsResponse(&res, req)
+	log.Println("Returning CSV")
 	http.ServeFile(res, req, Dir+"/data.csv")
 
 }
@@ -28,7 +30,7 @@ func GetCsv(res http.ResponseWriter, req *http.Request) {
 // Get function the data in a JSON format
 func Get(res http.ResponseWriter, req *http.Request) {
 	setupCorsResponse(&res, req)
-	log.Println("Returning JSON")
+	log.Println("Returning data")
 	json.NewEncoder(res).Encode(src.ReadJson())
 
 }

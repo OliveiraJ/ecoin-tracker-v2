@@ -34,10 +34,7 @@ func GetBalance(URL string) (float64, string, string) {
 		// Replace the comma carachter from the string after the regex treatment making it easy to convert to a number later.
 		r = strings.Replace(r, comma, replaceArgument, replaceTimes)
 
-		// Adds the time value to the Read.Date property.
 		date = time.Now().Format("02/01/2006")
-
-		// Adds the time value to the Read.Hour property
 		hour = time.Now().Format("15:04:05")
 
 		// Converts the screaped value to a string and adds it to the Read.BurnedTokens property
