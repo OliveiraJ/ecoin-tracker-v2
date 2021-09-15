@@ -6,10 +6,14 @@ import (
 	"net/http"
 
 	"github.com/OliveiraJ/ecoin-tracker-v2/src"
+	utils "github.com/OliveiraJ/ecoin-tracker-v2/src/utils"
 	"github.com/gorilla/mux"
 )
 
 const Dir = "./data"
+
+const pathFileJson = "./data/data.json"
+const pathFolder = "./data"
 
 // GetJson function returns the JSON file in the respective route
 func GetJson(res http.ResponseWriter, req *http.Request) {
@@ -31,7 +35,7 @@ func GetCsv(res http.ResponseWriter, req *http.Request) {
 func Get(res http.ResponseWriter, req *http.Request) {
 	setupCorsResponse(&res, req)
 	log.Println("Returning data")
-	json.NewEncoder(res).Encode(src.ReadJson())
+	json.NewEncoder(res).Encode(utils.ReadJson(pathFolder, pathFileJson, src.AllReads))
 
 }
 
