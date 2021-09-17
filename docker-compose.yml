@@ -8,10 +8,11 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ecoin_postgresql_volume:/var/postgresql/data
+      - ecoin_postgresql_volume:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       ecoin-compose-network:
-        ipv4_address: 172.20.0.3
+        ipv4_address: 172.21.0.2
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -26,13 +27,15 @@ services:
       - ecoin-compose-network
     volumes:
       - ecoin_pgadmin_volume:/var/pgadmin/data
+
   server:
     image: ecointracker:server
     container_name: "ecoin_server"
+    restart: always
     ports:
       - "10000:10000"
     volumes:
-      - ecoin_server_volume:/var/postgresql/data
+      - ./data:/var/lib/ecoin_server/data
     networks:
       - ecoin-compose-network
 volumes:
@@ -43,3 +46,7 @@ volumes:
 networks:
   ecoin-compose-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/25
+          gateway: 172.21.0.1
