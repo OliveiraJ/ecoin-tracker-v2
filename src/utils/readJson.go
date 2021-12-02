@@ -12,7 +12,7 @@ import (
 // ReadJson reads the JSON file and returns a slice of type Read
 func ReadJson(pathFolder string, pathFileJson string, AllReads []models.Read) []models.Read {
 
-	// Verify if the data diretory exists and creat it if it doesnt
+	// Verify if the data diretory exists and creates it if it doesnt
 	if !Exists(pathFolder) {
 		fmt.Fprintln(os.Stdout, "./data folder doesn't exist, creating folder")
 		err := os.Mkdir("data", 0755)

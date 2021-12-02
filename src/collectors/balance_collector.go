@@ -39,7 +39,7 @@ func GetBalance(URL string) (float64, string, string) {
 
 		// Converts the screaped value to a string and adds it to the Read.BurnedTokens property
 		if r != "" {
-			value, err := strconv.ParseFloat(r, 10)
+			value, err := strconv.ParseFloat(r, 64)
 			if err == nil {
 				burnedTokens = value
 			}

@@ -22,18 +22,18 @@ func main() {
 
 	// Runs the loop that verify the local time and reuns the functions when the specifeid time is reached
 	for range ticker.C {
-		t := time.Now()
-		if t.Hour() == 22 {
-			fmt.Fprintln(os.Stdout, "Starting a new read...")
+		// t := time.Now()
+		// if t.Hour() == 22 {
+		fmt.Fprintln(os.Stdout, "Starting a new read...")
 
-			// Runs the GetData function of the src package, with the URL of the ecoin token deadwallet
-			src.GetData(URL)
+		// Runs the GetData function of the src package, with the URL of the ecoin token deadwallet
+		src.GetData(URL)
 
-			fmt.Fprintln(os.Stdout, "End of reading step")
-			fmt.Fprintln(os.Stdout, "End of cicle!")
-		} else {
-			fmt.Fprintln(os.Stdout, "--> Hour: ", time.Now().Format("15:04:05"))
-			fmt.Fprintln(os.Stdout, "Waiting for the specified time...")
-		}
+		fmt.Fprintln(os.Stdout, "End of reading step")
+		fmt.Fprintln(os.Stdout, "End of cicle!")
+		// } else {
+		// 	fmt.Fprintln(os.Stdout, "--> Hour: ", time.Now().Format("15:04:05"))
+		// 	fmt.Fprintln(os.Stdout, "Waiting for the specified time...")
+		// }
 	}
 }
